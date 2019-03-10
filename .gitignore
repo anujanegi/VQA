@@ -1,0 +1,12 @@
+# VS Code
+.idea
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Test images
+images/*
+
+# Models
+data/

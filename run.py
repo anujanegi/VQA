@@ -1,10 +1,12 @@
 from modules.object_detection import ObjectDetector
 from modules.color_detection import ColorDetector
-from text.text_generator import TextGenerator
-from collections import Counter
+from collections import Counter, defaultdict
+from pprint import pprint
 import matplotlib.pyplot as plt
 import cv2
 import argparse
+
+recursive_dict = lambda: defaultdict(recursive_dict)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--path', help='path of the input image', required=True)
@@ -35,24 +37,20 @@ format:
     ...
 }
 """
-knowledge = {}
+knowledge = recursive_dict()
 
-object_detector = ObjectDetector()
-color_detector = ColorDetector()
-text_generator = TextGenerator()
-
-boxes, classes = object_detector.predict(img)
+boxes, classes = ObjectDetector.predict(img)
 class_count = Counter(classes)
 
 # populate counts
-for class_, count in class_count:
+for class_, count in class_count.items():
     knowledge[class_]["count"] = count
 
 # populate object attributes
 for i, box in enumerate(boxes):
     l, t, r, b = list(map(int, box))
     crop = img[t:b, l:r]
-    color = color_detector.predict(crop)
+    color = ColorDetector.predict(crop)
     knowledge[classes[i]]['objects']["%s%d" % (classes[i], i)] = {
         "color": color,
         "location": [l, t, r, b]
@@ -67,7 +65,6 @@ for i, box in enumerate(boxes):
     # put labels
     cv2.putText(img, str(label), (l + 10, b - 10), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
 
-print(knowledge)
-print(text_generator.describe(knowledge))
+pprint(knowledge)
 plt.imshow(img, 'gray')
 plt.show()

@@ -9,11 +9,13 @@ PATH_TO_LABELS = "./data/mscoco_label_map.pbtxt"
 
 
 class ObjectDetector:
-    def __init__(self):
-        self.cv_net = cv2.dnn.readNetFromTensorflow(PATH_TO_MODEL_WEIGHTS, PATH_TO_GRAPH)
-        self.labels = coco_label_reader(PATH_TO_LABELS)
 
-    def predict(self, frame):
+    @staticmethod
+    def predict(frame):
+
+        cv_net = cv2.dnn.readNetFromTensorflow(PATH_TO_MODEL_WEIGHTS, PATH_TO_GRAPH)
+        labels = coco_label_reader(PATH_TO_LABELS)
+
         """
         predict objects in the frame
         :param frame: input image as numpy array
@@ -21,8 +23,8 @@ class ObjectDetector:
         """
         rows, cols, _ = frame.shape
         blob = cv2.dnn.blobFromImage(frame, size=(rows, cols), swapRB=True, crop=False)
-        self.cv_net.setInput(blob)
-        cv_out = self.cv_net.forward()
+        cv_net.setInput(blob)
+        cv_out = cv_net.forward()
         boxes = []
         classes = []
         for detection in cv_out[0, 0, :, :]:
@@ -34,5 +36,5 @@ class ObjectDetector:
                 bottom = detection[6] * rows
                 class_ = int(detection[1])
                 boxes.append([left, top, right, bottom])
-                classes.append(self.labels[class_])
+                classes.append(labels[class_])
         return non_max_suppression(np.asarray(boxes), np.asarray(classes))

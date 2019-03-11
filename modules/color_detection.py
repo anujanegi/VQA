@@ -1,11 +1,11 @@
 from sklearn.cluster import KMeans
 import numpy as np
-import matplotlib.pyplot as pyplot
-import matplotlib.patches as patches
-import cv2
 import webcolors
 
+
 class ColorDetector:
+
+    @staticmethod
     def find_closest_color(requested_colour):
         """
         finds the closest color in the sixteen HTML4 color
@@ -13,7 +13,7 @@ class ColorDetector:
         :return: RGB value of color closest among HTML4 colors
         """
         min_colours = {}
-        for key, name in webcolors.css3_hex_to_names.items():
+        for key, name in webcolors.html4_hex_to_names.items():
             r_c, g_c, b_c = webcolors.hex_to_rgb(key)
             rd = (r_c - requested_colour[0]) ** 2
             gd = (g_c - requested_colour[1]) ** 2
@@ -21,6 +21,7 @@ class ColorDetector:
             min_colours[(rd + gd + bd)] = name
         return min_colours[min(min_colours.keys())]
 
+    @staticmethod
     def get_colour_name(requested_colour):
         """
         get color name of passed RGB value
@@ -28,12 +29,12 @@ class ColorDetector:
         :return: named color of the RGB value
         """
         try:
-            closest_name = actual_name = webcolors.rgb_to_name(requested_colour)
+            closest_name = webcolors.rgb_to_name(requested_colour)
         except ValueError:
-            closest_name = find_closest_color(requested_colour)
-            actual_name = None
+            closest_name = ColorDetector.find_closest_color(requested_colour)
         return closest_name
 
+    @staticmethod
     def predict(frame):
         """
         predicts primary color in the frame
@@ -47,12 +48,12 @@ class ColorDetector:
         height, width, dim = frame.shape
 
         frame_vector = np.reshape(frame, [height*width, dim])
-        kmeans = KMeans(n_clusters=1)
-        kmeans.fit(frame_vector)
+        k_means = KMeans(n_clusters=1)
+        k_means.fit(frame_vector)
 
-        unique_l, counts_l = np.unique(kmeans.labels_, return_counts=True)
+        unique_l, counts_l = np.unique(k_means.labels_, return_counts=True)
         sort_ix = np.argsort(counts_l)
         sort_ix = sort_ix[::-1]
-        cluster_center = [int(i) for i in kmeans.cluster_centers_[sort_ix][0]][::-1]
+        cluster_center = [int(i) for i in k_means.cluster_centers_[sort_ix][0]][::-1]
 
-        return get_colour_name(tuple(cluster_center))
+        return ColorDetector.get_colour_name(tuple(cluster_center))

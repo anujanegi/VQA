@@ -1,9 +1,14 @@
-from object_detection import ObjectDetector
+from modules.object_detection import ObjectDetector
 from text import text_generator
 import matplotlib.pyplot as plt
 import cv2
+import argparse
 
-img = cv2.imread("./images/image2.jpg")
+parser = argparse.ArgumentParser()
+parser.add_argument('-p', '--path', help='path of the input image', required=True)
+args = vars(parser.parse_args())
+
+img = cv2.imread(args['path'])
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 od = ObjectDetector()

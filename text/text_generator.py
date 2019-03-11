@@ -1,24 +1,39 @@
-from collections import Counter
 import inflect
 
 
-def describe_objects(objects):
-    """
-    describe that the scenery contains the given objects
-    Example:
-        There is a person.
-        There are two boys.
-        There is an elephant.
-    :param objects: list of objects
-    :return list of sentences
-    """
-    text = []
-    objects = Counter(objects)
-    ie = inflect.engine()
-    for obj, count in objects.items():
-        sentence = "There %s %s." % (
-            ie.plural_verb("is", count=count),
-            ie.a(ie.plural(obj, count=count), count=ie.number_to_words(count))
+class TextGenerator:
+    def __init__(self):
+        self.ie = inflect.engine()
+
+    def describe_class_count(self, class_, count):
+        """
+        describe the class_ with respect to count
+        Example:
+            There is one person.
+            There are two kites.
+            There is one watch.
+        :param class_: class of the object
+        :param count: number of objects
+        :return: sentence describing count
+        """
+        return "There %s %s %s." % (
+            self.ie.plural_verb("is", count=count),
+            self.ie.number_to_words(count),
+            self.ie.plural(class_, count=count)
         )
-        text.append(sentence)
-    return text
+
+    def describe_object_color(self, obj, count, color=None, position=None):
+        """
+        describe the color of the object
+        Example:
+            The dog is brown in color.
+            The bottle is pink in color.
+        :param obj: object to describe
+        :param count: count of the objects
+        :param position: relative position of the object if any
+        :param color: color of the object
+        :return: sentence describing color
+        """
+        pass
+
+

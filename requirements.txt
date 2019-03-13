@@ -1,3 +1,5 @@
+imutils
+pytesseract
 inflect
 numpy
 matplotlib

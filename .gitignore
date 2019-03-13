@@ -8,3 +8,5 @@ __pycache__/
 # Test images
 images/*
 
+# External scripts
+external/

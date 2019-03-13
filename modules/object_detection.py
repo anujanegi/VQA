@@ -12,15 +12,14 @@ class ObjectDetector:
 
     @staticmethod
     def predict(frame):
-
-        cv_net = cv2.dnn.readNetFromTensorflow(PATH_TO_MODEL_WEIGHTS, PATH_TO_GRAPH)
-        labels = coco_label_reader(PATH_TO_LABELS)
-
         """
         predict objects in the frame
         :param frame: input image as numpy array
         :return: objects and bounding boxes
         """
+        cv_net = cv2.dnn.readNetFromTensorflow(PATH_TO_MODEL_WEIGHTS, PATH_TO_GRAPH)
+        labels = coco_label_reader(PATH_TO_LABELS)
+
         rows, cols, _ = frame.shape
         blob = cv2.dnn.blobFromImage(frame, size=(rows, cols), swapRB=True, crop=False)
         cv_net.setInput(blob)

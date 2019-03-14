@@ -1,7 +1,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
 import webcolors
-from colorthief import ColorThief
 
 
 class ColorDetector:
@@ -14,7 +13,7 @@ class ColorDetector:
         :return: RGB value of color closest among HTML4 colors
         """
         min_colours = {}
-        for key, name in webcolors.html4_hex_to_names.items():
+        for key, name in webcolors.css3_hex_to_names.items():
             r_c, g_c, b_c = webcolors.hex_to_rgb(key)
             rd = (r_c - requested_colour[0]) ** 2
             gd = (g_c - requested_colour[1]) ** 2
@@ -42,21 +41,18 @@ class ColorDetector:
         :param frame: input image as numpy array
         :return: name of the color
         """
-        dominant_color = ColorThief(frame)
-        return color_thief.get_color(quality=1)
-        # height, width, dim = frame.shape
-        #
-        # # get centre of frame
-        # frame = frame[(height//4):(3*height//4), (width//4):(3*width//4), :]
-        # height, width, dim = frame.shape
-        #
-        # frame_vector = np.reshape(frame, [height*width, dim])
-        # k_means = KMeans(n_clusters=1)
-        # k_means.fit(frame_vector)
-        #
-        # unique_l, counts_l = np.unique(k_means.labels_, return_counts=True)
-        # sort_ix = np.argsort(counts_l)
-        # sort_ix = sort_ix[::-1]
-        # cluster_center = [int(i) for i in k_means.cluster_centers_[sort_ix][0]][::-1]
-        #
-        # return ColorDetector.get_colour_name(tuple(cluster_center))
+        height, width, dim = frame.shape
+        resized = np.resize(frame, (width * height, dim))
+        # cluster
+        k_means = KMeans(16)
+        labels = k_means.fit_predict(resized)
+        palette = k_means.cluster_centers_
+        # create new image
+        new_image = np.reshape(palette[labels], (width, height, palette.shape[1]))
+        new_image = new_image.astype(np.uint8)
+        # find dominant color
+        unique, counts = np.unique(new_image.reshape(-1, new_image.shape[2]), return_counts=True, axis=0)
+        sort_ix = np.argsort(counts)
+        sort_ix = sort_ix[-1]
+        
+        return ColorDetector.get_colour_name(tuple(unique[sort_ix]))

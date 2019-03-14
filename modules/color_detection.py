@@ -1,6 +1,7 @@
 from sklearn.cluster import KMeans
 import numpy as np
 import webcolors
+from colorthief import ColorThief
 
 
 class ColorDetector:
@@ -41,19 +42,21 @@ class ColorDetector:
         :param frame: input image as numpy array
         :return: name of the color
         """
-        height, width, dim = frame.shape
-
-        # get centre of frame
-        frame = frame[(height//4):(3*height//4), (width//4):(3*width//4), :]
-        height, width, dim = frame.shape
-
-        frame_vector = np.reshape(frame, [height*width, dim])
-        k_means = KMeans(n_clusters=1)
-        k_means.fit(frame_vector)
-
-        unique_l, counts_l = np.unique(k_means.labels_, return_counts=True)
-        sort_ix = np.argsort(counts_l)
-        sort_ix = sort_ix[::-1]
-        cluster_center = [int(i) for i in k_means.cluster_centers_[sort_ix][0]][::-1]
-
-        return ColorDetector.get_colour_name(tuple(cluster_center))
+        dominant_color = ColorThief(frame)
+        return color_thief.get_color(quality=1)
+        # height, width, dim = frame.shape
+        #
+        # # get centre of frame
+        # frame = frame[(height//4):(3*height//4), (width//4):(3*width//4), :]
+        # height, width, dim = frame.shape
+        #
+        # frame_vector = np.reshape(frame, [height*width, dim])
+        # k_means = KMeans(n_clusters=1)
+        # k_means.fit(frame_vector)
+        #
+        # unique_l, counts_l = np.unique(k_means.labels_, return_counts=True)
+        # sort_ix = np.argsort(counts_l)
+        # sort_ix = sort_ix[::-1]
+        # cluster_center = [int(i) for i in k_means.cluster_centers_[sort_ix][0]][::-1]
+        #
+        # return ColorDetector.get_colour_name(tuple(cluster_center))

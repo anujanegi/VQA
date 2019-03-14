@@ -3,6 +3,5 @@ pytesseract
 inflect
 numpy
 matplotlib
-cv2
 sklearn
 webcolors

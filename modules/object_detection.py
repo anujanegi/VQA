@@ -34,6 +34,10 @@ class ObjectDetector:
                 right = detection[5] * cols
                 bottom = detection[6] * rows
                 class_ = int(detection[1])
+                if left > right:
+                    left, right = right, left
+                if top > bottom:
+                    top, bottom = bottom, top
                 boxes.append([left, top, right, bottom])
                 classes.append(labels[class_])
         return non_max_suppression(np.asarray(boxes), np.asarray(classes))

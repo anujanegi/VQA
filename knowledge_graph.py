@@ -1,6 +1,7 @@
 from modules.object_detection import ObjectDetector
 from modules.color_detection import ColorDetector
 from modules.text_detection import TextDetector
+from modules.scene_classification import SceneClassifier
 from collections import Counter
 import cv2
 
@@ -11,36 +12,42 @@ def create_knowledge_graph(frame):
     will be used to generate a caption to pass to the qa system;
     format:
     {
-        class1: {
-            count: n1
-            objects: {
-                class1object1: {
-                    color: class1object1color,
-                    location: [left, top, right, bottom],
-                    text: ?
-                },
-                class1object2: {
-                    color: class1object2color
-                    location: [left, top, right, bottom],
-                    text: ?
-                },
-                ...
-            }
-        },
-        ...
+        classes:{
+            class1: {
+                count: n1
+                objects: {
+                    class1object1: {
+                        color: class1object1color,
+                        location: [left, top, right, bottom],
+                        text: ?
+                    },
+                    class1object2: {
+                        color: class1object2color
+                        location: [left, top, right, bottom],
+                        text: ?
+                    },
+                    ...
+                }
+            },
+            ...
+        }
+        scene:scene
     }
     :param frame: input image
     :return: knowledge dict and plotted image
     """
-    knowledge = {}
+
+    knowledge = {"scene": "", "classes": {}}
+    # add scene
+    knowledge["scene"] = SceneClassifier.predict(frame)
 
     boxes, classes = ObjectDetector.predict(frame)
     class_count = Counter(classes)
 
     # populate counts
     for class_, count in class_count.items():
-        knowledge[class_] = {}
-        knowledge[class_]["count"] = count
+        knowledge["classes"][class_] = {}
+        knowledge["classes"][class_]["count"] = count
 
     # populate object attributes
     for i, box in enumerate(boxes):
@@ -48,10 +55,10 @@ def create_knowledge_graph(frame):
         crop = frame[t:b, l:r]
         text = TextDetector.detect(crop)
         color = ColorDetector.predict(crop)
-        index = len(knowledge[classes[i]].get("objects", {}))
+        index = len(knowledge["classes"][classes[i]].get("objects", {}))
         if index == 0:
-            knowledge[classes[i]]["objects"] = {}
-        knowledge[classes[i]]["objects"]["%s%d" % (classes[i], index)] = {
+            knowledge["classes"][classes[i]]["objects"] = {}
+        knowledge["classes"][classes[i]]["objects"]["%s%d" % (classes[i], index)] = {
             "color": color,
             "location": [l, t, r, b],
             "text": text

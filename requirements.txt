@@ -6,3 +6,5 @@ matplotlib
 sklearn
 webcolors
 colorthief
+torch
+torchvision

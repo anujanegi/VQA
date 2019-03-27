@@ -1,13 +1,23 @@
+from deeppavlov import build_model, configs
+from utils.nostderrout import nostderrout
+
+
 class AnswerGenerator:
-    @staticmethod
-    def predict(comprehension, question):
+    def __init__(self):
+        """
+        create a model from pre-trained weights
+        """
+        print("START")
+        with nostderrout():
+            self.model = build_model(configs.squad.squad)
+        print("END")
+
+    def predict(self, comprehension, question):
         """
         predict answer for a question based on the given data
         :param comprehension: data to read for answering the question
         :param question: question based on the comprehension
         :return: answer for the question
         """
-        pass
+        return self.model([comprehension], [question])[0]
 
-ag = AnswerGenerator()
-print(ag.predict("There are two people.", "How many people are there?"))

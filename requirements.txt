@@ -8,3 +8,4 @@ webcolors
 colorthief
 torch
 torchvision
+num2words

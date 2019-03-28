@@ -9,3 +9,4 @@ colorthief
 torch
 torchvision
 num2words
+deeppavlov

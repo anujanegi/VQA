@@ -1,7 +1,7 @@
 from sklearn.cluster import KMeans
+from collections import Counter
 import numpy as np
 import webcolors
-
 
 class ColorDetector:
 
@@ -41,18 +41,13 @@ class ColorDetector:
         :param frame: input image as numpy array
         :return: name of the color
         """
-        height, width, dim = frame.shape
-        resized = np.resize(frame, (width * height, dim))
-        # cluster
-        k_means = KMeans(16)
-        labels = k_means.fit_predict(resized)
-        palette = k_means.cluster_centers_
-        # create new image
-        new_image = np.reshape(palette[labels], (width, height, palette.shape[1]))
-        new_image = new_image.astype(np.uint8)
-        # find dominant color
-        unique, counts = np.unique(new_image.reshape(-1, new_image.shape[2]), return_counts=True, axis=0)
-        sort_ix = np.argsort(counts)
-        sort_ix = sort_ix[-1]
-        
-        return ColorDetector.get_colour_name(tuple(unique[sort_ix]))
+
+        frame = frame.reshape((frame.shape[0] * frame.shape[1], 3))
+        #cluster and assign labels to the pixels
+        clt = KMeans(n_clusters = 4)
+        labels = clt.fit_predict(frame)
+        #count labels to find most popular
+        label_counts = Counter(labels)
+        dominant_color = clt.cluster_centers_[label_counts.most_common(1)[0][0]]
+
+        return ColorDetector.get_colour_name(tuple(np.array(dominant_color, dtype=int)))

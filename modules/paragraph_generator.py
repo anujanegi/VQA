@@ -5,6 +5,19 @@ class ParagraphGenerator:
     def __init__(self):
         self.ie = inflect.engine()
 
+    def describe_class_presence(self, class_):
+        """
+        describe the class_ with respect to count
+        Example:
+            There is a person.
+            There is an egg.
+        :param class_: class of the object
+        :return: sentence describing count
+        """
+        return "There is %s . " % (
+            self.ie.a(class_)
+        )
+
     def describe_class_count(self, class_, count):
         """
         describe the class_ with respect to count
@@ -22,7 +35,7 @@ class ParagraphGenerator:
             self.ie.plural(class_, count=count)
         )
 
-    def describe_object_color(self, classname, id, color):
+    def describe_object_color(self, classname, id, color, single=False):
         """
         describe the color of the object
         Example:
@@ -34,18 +47,22 @@ class ParagraphGenerator:
         :param color: color of the object
         :return: sentence describing color
         """
+        num2word = num2words(id, to='ordinal') + ' '
+        if single:
+            num2word = ""
+
         if(classname == "person"):
-            template = "The %s %s is wearing %s color. "
+            template = "The %s%s is wearing %s color. "
         else:
-            template = "The %s %s is %s in color. "
+            template = "The %s%s is %s in color. "
 
         return template % (
-            num2words(id, to='ordinal'),
+            num2word,
             classname,
             color
         )
 
-        def describe_object_text(self, classname, id, text):
+        def describe_object_text(self, classname, id, text, single=False):
             """
             describe the text on the object
             Example:
@@ -56,16 +73,20 @@ class ParagraphGenerator:
             :param text: text on the object
             :return: sentence describing text
             """
+            num2word = num2words(id, to='ordinal') + ' '
+            if single:
+                num2word = ""
+
             description = ""
 
-            description +=  "The %s %s says %s. " % (
-                num2words(id, to='ordinal'),
+            description +=  "The %s%s says %s. " % (
+                num2word,
                 classname,
                 text
             )
-            description +=  "%s is written on the %s %s. " % (
+            description +=  "%s is written on the %s%s. " % (
                 text,
-                num2words(id, to='ordinal'),
+                num2word,
                 classname
             )
 
@@ -90,16 +111,21 @@ class ParagraphGenerator:
             self.ie.a(scene)
         )
 
+        description += "I see %s. " % (
+            self.ie.a(scene)
+        )
+
         return description
 
     def describe_class(self, classname, attributes):
         class_description = ""
+        class_description += self.describe_class_presence(classname)
         class_description += self.describe_class_count(classname, attributes['count'])
         for i in range(attributes['count']):
             properties = attributes['objects']['%s%d' % (classname, i)]
-            class_description += self.describe_object_color(classname, i+1, properties['color'])
+            class_description += self.describe_object_color(classname, i+1, properties['color'], attributes['count']==1)
             if(properties['text'] != ''):
-                class_description += self.describe_object_text(classname, i+1, properties['text'])
+                class_description += self.describe_object_text(classname, i+1, properties['text'], attributes['count']==1)
         return class_description
 
     def generate(self, knowledge_graph):

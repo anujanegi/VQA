@@ -1,53 +1,73 @@
-from sklearn.cluster import KMeans
-from collections import Counter
+import cv2
 import numpy as np
-import webcolors
 
 class ColorDetector:
 
-    @staticmethod
-    def find_closest_color(requested_colour):
-        """
-        finds the closest color in the sixteen HTML4 color
-        :param requested_colour: RGB value of color
-        :return: RGB value of color closest among HTML4 colors
-        """
-        min_colours = {}
-        for key, name in webcolors.css3_hex_to_names.items():
-            r_c, g_c, b_c = webcolors.hex_to_rgb(key)
-            rd = (r_c - requested_colour[0]) ** 2
-            gd = (g_c - requested_colour[1]) ** 2
-            bd = (b_c - requested_colour[2]) ** 2
-            min_colours[(rd + gd + bd)] = name
-        return min_colours[min(min_colours.keys())]
+    colors = {"black": [0, 0, 0],
+              "white": [255, 255, 255],
+              "gray": [102, 102, 102],
+              "maroon": [140, 0, 0],
+              "red": [255, 0, 0],
+              "orange": [255, 85, 0],
+              "yellow": [255, 170, 0],
+              "green": [0, 255, 0],
+              "aqua": [0, 255, 242],
+              "blue": [0, 85, 255],
+              "purple": [102, 0, 255],
+              "pink": [255, 0, 255]}
 
     @staticmethod
-    def get_colour_name(requested_colour):
+    def nearest_color(color):
         """
-        get color name of passed RGB value
-        :param requested_colour: RGB value of a color
-        :return: named color of the RGB value
+        find the nearest color
+        :param color: (R, G, B)
+        :return: nearest (R', G', B')
         """
-        try:
-            closest_name = webcolors.rgb_to_name(requested_colour)
-        except ValueError:
-            closest_name = ColorDetector.find_closest_color(requested_colour)
-        return closest_name
+        wrapper = np.uint8([[list(color)]])
+        hsv_wrapper = cv2.cvtColor(wrapper, cv2.COLOR_RGB2HSV)
+        hsv = hsv_wrapper[0, 0] + [10, 0, 0]
+        h, s, v = hsv
+        if v < 30:
+            return ColorDetector.colors["black"]
+        elif v < 80:
+            return ColorDetector.colors["gray"]
+        elif v > 190 and s < 27:
+            return ColorDetector.colors["white"]
+        elif s < 54 and v < 185:
+            return ColorDetector.colors["gray"]
+        elif h < 18:
+            if v < 150:
+                return ColorDetector.colors["maroon"]
+            else:
+                return ColorDetector.colors["red"]
+        elif h < 26:
+            return ColorDetector.colors["orange"]
+        elif h < 34:
+            return ColorDetector.colors["yellow"]
+        elif h < 73:
+            return ColorDetector.colors["green"]
+        elif h < 102:
+            return ColorDetector.colors["aqua"]
+        elif h < 127:
+            return ColorDetector.colors["blue"]
+        elif h < 149:
+            return ColorDetector.colors["purple"]
+        elif h < 175:
+            return ColorDetector.colors["pink"]
+        else:
+            return ColorDetector.colors["red"]
 
     @staticmethod
-    def predict(frame):
-        """
-        predicts primary color in the frame
-        :param frame: input image as numpy array
-        :return: name of the color
-        """
+    def approximate_image(image):
+        return np.asarray([[ColorDetector.nearest_color(pixel) for pixel in row] for row in image])
 
-        frame = frame.reshape((frame.shape[0] * frame.shape[1], 3))
-        #cluster and assign labels to the pixels
-        clt = KMeans(n_clusters = 4)
-        labels = clt.fit_predict(frame)
-        #count labels to find most popular
-        label_counts = Counter(labels)
-        dominant_color = clt.cluster_centers_[label_counts.most_common(1)[0][0]]
-
-        return ColorDetector.get_colour_name(tuple(np.array(dominant_color, dtype=int)))
+    @staticmethod
+    def find_color(image):
+        image = ColorDetector.approximate_image(image)
+        (values, counts) = np.unique(image.reshape(-1, image.shape[2]), return_counts=True, axis=0)
+        index = np.argmax(counts)
+        color = values[index]
+        for (key, value) in ColorDetector.colors.items():
+            if (value == color).all():
+                return key
+        return "black"

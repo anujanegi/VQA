@@ -37,9 +37,7 @@ def create_knowledge_graph(frame):
     :return: knowledge dict and plotted image
     """
 
-    knowledge = {"scene": "", "classes": {}}
-    # add scene
-    knowledge["scene"] = SceneClassifier.predict(frame)
+    knowledge = {"scene": SceneClassifier.predict(frame), "classes": {}}
 
     boxes, classes = ObjectDetector.predict(frame)
     class_count = Counter(classes)
@@ -54,7 +52,7 @@ def create_knowledge_graph(frame):
         l, t, r, b = list(map(int, box))
         crop = frame[t:b, l:r]
         text = TextDetector.detect(crop)
-        color = ColorDetector.predict(crop)
+        color = ColorDetector.find_color(crop)
         index = len(knowledge["classes"][classes[i]].get("objects", {}))
         if index == 0:
             knowledge["classes"][classes[i]]["objects"] = {}

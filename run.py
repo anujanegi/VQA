@@ -14,15 +14,17 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 knowledge, frame = knowledge_graph.create_knowledge_graph(image)
 pprint(knowledge)
-
-paragraph_generator = ParagraphGenerator()
-paragraph = paragraph_generator.generate(knowledge)
-
-answer_generator = AnswerGenerator()
-print(paragraph)
-
-while True:
-    question = input().strip()
-    if question == "":
-        break
-    print(answer_generator.predict(paragraph, question))
+#
+# paragraph_generator = ParagraphGenerator()
+# paragraph = paragraph_generator.generate(knowledge)
+#
+# print(paragraph)
+# answer_generator = AnswerGenerator(verbose=True)
+#
+# while True:
+#     print("[QUESTION] ", end="")
+#     question = input().strip()
+#     if question == "":
+#         break
+#     answer = answer_generator.predict(paragraph, question)[0]
+#     print("[ANSWER] %s" % answer)

@@ -1,4 +1,5 @@
 import cv2
+import re
 import numpy as np
 import pytesseract
 from imutils.object_detection import non_max_suppression
@@ -86,11 +87,10 @@ class TextDetector:
         :param detected: array of [text, bounding box]
         :return: sentence of words
         """
-        # TODO: complete this function
         sentence = ""
         for text, _ in detected:
-            sentence += text.strip() + " "
-        return sentence
+            sentence += " ".join(re.findall("[a-zA-Z]+", text)).strip() + " "
+        return sentence.strip()
 
     @staticmethod
     def detect(frame):

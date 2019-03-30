@@ -1,6 +1,7 @@
 import inflect
 from num2words import num2words
 
+
 class ParagraphGenerator:
     def __init__(self):
         self.ie = inflect.engine()
@@ -35,6 +36,36 @@ class ParagraphGenerator:
             self.ie.plural(class_, count=count)
         )
 
+    def describe_object_text(self, classname, id, text, single=False):
+        """
+        describe the text on the object
+        Example:
+            The first board says hello.
+            Hello is written on the first stop sign.
+        :param classname: object to describe
+        :param id: identifier of the object
+        :param text: text on the object
+        :return: sentence describing text
+        """
+        num2word = num2words(id, to='ordinal') + ' '
+        if single:
+            num2word = ""
+
+        description = ""
+
+        description += "The %s%s says %s. " % (
+            num2word,
+            classname,
+            text
+        )
+        description += "%s is written on the %s%s. " % (
+            text,
+            num2word,
+            classname
+        )
+
+        return description
+
     def describe_object_color(self, classname, id, color, single=False):
         """
         describe the color of the object
@@ -45,6 +76,7 @@ class ParagraphGenerator:
         :param classname: object to describe
         :param id: identifier of the object
         :param color: color of the object
+        :param single: if object is occurring once, do not mention index
         :return: sentence describing color
         """
         num2word = num2words(id, to='ordinal') + ' '
@@ -61,36 +93,6 @@ class ParagraphGenerator:
             classname,
             color
         )
-
-        def describe_object_text(self, classname, id, text, single=False):
-            """
-            describe the text on the object
-            Example:
-                The first board says hello.
-                Hello is written on the first stop sign.
-            :param classname: object to describe
-            :param id: identifier of the object
-            :param text: text on the object
-            :return: sentence describing text
-            """
-            num2word = num2words(id, to='ordinal') + ' '
-            if single:
-                num2word = ""
-
-            description = ""
-
-            description +=  "The %s%s says %s. " % (
-                num2word,
-                classname,
-                text
-            )
-            description +=  "%s is written on the %s%s. " % (
-                text,
-                num2word,
-                classname
-            )
-
-            return description
 
     def describe_scene(self, scene):
         """

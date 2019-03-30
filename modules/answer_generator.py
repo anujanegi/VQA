@@ -3,14 +3,16 @@ from utils.nostderrout import nostderrout
 
 
 class AnswerGenerator:
-    def __init__(self):
+    def __init__(self, verbose=False):
         """
         create a model from pre-trained weights
         """
-        print("START")
+        if verbose:
+            print("Loading model. This might take a while...")
         with nostderrout():
             self.model = build_model(configs.squad.squad)
-        print("END")
+        if verbose:
+            print("Loaded model.")
 
     def predict(self, comprehension, question):
         """

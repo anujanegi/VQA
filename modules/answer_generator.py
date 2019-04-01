@@ -22,4 +22,3 @@ class AnswerGenerator:
         :return: answer for the question
         """
         return self.model([comprehension], [question])[0]
-
